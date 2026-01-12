@@ -4,10 +4,6 @@ A CLI tool for searching crates in a local offline cargo registry.
 
 ## Usage
 
-```bash
-offline-search <query> [--limit <n>]
-```
-
 Search for crates by name (case-insensitive, partial match):
 
 ```bash
