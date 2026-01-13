@@ -4,6 +4,7 @@ mod crate_info;
 mod description;
 mod error;
 mod registry;
+mod remote;
 
 use clap::Parser;
 
@@ -11,9 +12,26 @@ use cli::Args;
 use crate_info::{matches_query, parse_crate_file, CrateInfo};
 use error::Result;
 
-fn run() -> Result<()> {
-    let args = Args::parse();
+fn run_remote(args: &Args, url: &str, repo: &str) -> Result<()> {
+    let results = remote::search_remote(url, repo, &args.query)?;
 
+    // Apply limit
+    let limit = args.limit.unwrap_or(results.len());
+    let results: Vec<_> = results.into_iter().take(limit).collect();
+
+    if results.is_empty() {
+        println!("No crates found matching '{}'", args.query);
+        return Ok(());
+    }
+
+    for result in results {
+        println!("{} = \"{}\"", result.name, result.version);
+    }
+
+    Ok(())
+}
+
+fn run_local(args: &Args) -> Result<()> {
     // Find and verify the local registry
     let registry_path = match &args.registry {
         Some(name) => config::find_registry_by_name(name)?,
@@ -76,6 +94,17 @@ fn run() -> Result<()> {
     }
 
     Ok(())
+}
+
+fn run() -> Result<()> {
+    let args = Args::parse();
+
+    // Check if running in remote mode
+    if let (Some(url), Some(repo)) = (&args.url, &args.repo) {
+        run_remote(&args, url, repo)
+    } else {
+        run_local(&args)
+    }
 }
 
 fn main() {

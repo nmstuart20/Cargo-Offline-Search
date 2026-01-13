@@ -13,6 +13,14 @@ pub struct Args {
     pub limit: Option<usize>,
 
     /// Registry name to search (from [registries] in .cargo/config.toml)
-    #[arg(short, long)]
+    #[arg(short, long, conflicts_with_all = ["url", "repo"])]
     pub registry: Option<String>,
+
+    /// SonaType Nexus URL for remote search (requires --repo)
+    #[arg(long, requires = "repo", conflicts_with = "registry")]
+    pub url: Option<String>,
+
+    /// Repository name in SonaType Nexus (required with --url)
+    #[arg(long, requires = "url")]
+    pub repo: Option<String>,
 }

@@ -31,6 +31,18 @@ pub enum Error {
         path: PathBuf,
         source: serde_json::Error,
     },
+
+    #[error("Missing credentials. Set OFFLINE_SEARCH_USERNAME and OFFLINE_SEARCH_PASSWORD environment variables")]
+    MissingCredentials,
+
+    #[error("HTTP request failed: {0}")]
+    HttpRequest(#[from] reqwest::Error),
+
+    #[error("Remote server returned error: HTTP {status}")]
+    HttpStatus { status: u16 },
+
+    #[error("Failed to parse remote response: {0}")]
+    RemoteParse(#[source] serde_json::Error),
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
