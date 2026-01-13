@@ -7,6 +7,12 @@ use crate::error::{Error, Result};
 #[derive(Deserialize, Debug)]
 pub struct CargoConfig {
     pub source: Option<HashMap<String, Source>>,
+    pub registries: Option<HashMap<String, Registry>>,
+}
+
+#[derive(Deserialize, Debug)]
+pub struct Registry {
+    pub index: Option<String>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -92,6 +98,36 @@ pub fn find_local_registry() -> Result<PathBuf> {
     let path = PathBuf::from(registry_path);
 
     // Verify the registry path exists
+    if !path.exists() {
+        return Err(Error::RegistryNotFound(path));
+    }
+
+    Ok(path)
+}
+
+/// Find and return the registry path for a named registry from [registries] section
+pub fn find_registry_by_name(name: &str) -> Result<PathBuf> {
+    let config_path =
+        find_config_path().ok_or_else(|| Error::ConfigNotFound(get_checked_paths()))?;
+
+    let content = std::fs::read_to_string(&config_path)?;
+    let config: CargoConfig = toml::from_str(&content)?;
+
+    let registries = config
+        .registries
+        .ok_or_else(|| Error::RegistryNotConfigured(name.to_string()))?;
+
+    let registry = registries
+        .get(name)
+        .ok_or_else(|| Error::RegistryNotConfigured(name.to_string()))?;
+
+    let index_path = registry
+        .index
+        .as_ref()
+        .ok_or_else(|| Error::RegistryNotConfigured(name.to_string()))?;
+
+    let path = PathBuf::from(index_path);
+
     if !path.exists() {
         return Err(Error::RegistryNotFound(path));
     }

@@ -12,6 +12,11 @@ pub enum Error {
     #[error("No local registry configured. Ensure [source.crates-io] has 'replace-with' pointing to a source with 'local-registry'")]
     NoLocalRegistry,
 
+    #[error(
+        "Registry '{0}' not found in config. Ensure [registries.{0}] exists with an 'index' path"
+    )]
+    RegistryNotConfigured(String),
+
     #[error("Registry index not found at: {0}")]
     RegistryNotFound(PathBuf),
 

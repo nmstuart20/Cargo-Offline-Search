@@ -11,4 +11,8 @@ pub struct Args {
     /// Maximum number of results to display
     #[arg(short, long)]
     pub limit: Option<usize>,
+
+    /// Registry name to search (from [registries] in .cargo/config.toml)
+    #[arg(short, long)]
+    pub registry: Option<String>,
 }

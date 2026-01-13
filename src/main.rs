@@ -15,7 +15,10 @@ fn run() -> Result<()> {
     let args = Args::parse();
 
     // Find and verify the local registry
-    let registry_path = config::find_local_registry()?;
+    let registry_path = match &args.registry {
+        Some(name) => config::find_registry_by_name(name)?,
+        None => config::find_local_registry()?,
+    };
 
     // Find all crate index files
     let crate_files = registry::find_crate_files(&registry_path)?;
