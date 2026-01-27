@@ -28,7 +28,7 @@ fn get_credentials() -> Result<(String, String)> {
     Ok((username, password))
 }
 
-pub fn search_remote(base_url: &str, repo: &str, query: &str) -> Result<Vec<RemoteResult>> {
+pub fn search_remote(base_url: &str, repo: &str, query: &str, version: Option<&str>) -> Result<Vec<RemoteResult>> {
     let (username, password) = get_credentials()?;
 
     // Warn if using HTTP instead of HTTPS
@@ -36,12 +36,16 @@ pub fn search_remote(base_url: &str, repo: &str, query: &str) -> Result<Vec<Remo
         eprintln!("warning: Using HTTP instead of HTTPS. Credentials will be sent in plain text.");
     }
 
-    let url = format!(
+    let mut url = format!(
         "{}/service/rest/v1/search?repository={}&name=*{}*",
         base_url.trim_end_matches('/'),
         repo,
         query
     );
+
+    if let Some(v) = version {
+        url.push_str(&format!("&version={}", v));
+    }
 
     let client = Client::new();
     let response = client

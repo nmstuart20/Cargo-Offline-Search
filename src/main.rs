@@ -13,7 +13,7 @@ use crate_info::{matches_query, parse_crate_file, CrateInfo};
 use error::Result;
 
 fn run_remote(args: &Args, url: &str, repo: &str) -> Result<()> {
-    let results = remote::search_remote(url, repo, &args.query)?;
+    let results = remote::search_remote(url, repo, &args.query, args.version.as_deref())?;
 
     // Apply limit
     let limit = args.limit.unwrap_or(results.len());
@@ -49,7 +49,13 @@ fn run_local(args: &Args) -> Result<()> {
             Ok(versions) => {
                 if let Some(first) = versions.first() {
                     if matches_query(&first.name, &args.query) {
-                        if let Some(info) = CrateInfo::from_versions(versions) {
+                        if let Some(mut info) = CrateInfo::from_versions(versions) {
+                            if let Some(ref v) = args.version {
+                                info.versions.retain(|ver| ver == v);
+                                if info.versions.is_empty() {
+                                    continue;
+                                }
+                            }
                             results.push(info);
                         }
                     }

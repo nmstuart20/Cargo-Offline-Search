@@ -3,7 +3,7 @@ use clap::Parser;
 #[derive(Parser, Debug)]
 #[command(name = "offline-search")]
 #[command(about = "Search a local cargo registry for crates")]
-#[command(version)]
+#[command(version, disable_version_flag = true)]
 pub struct Args {
     /// Search query (partial crate name match, case-insensitive)
     pub query: String,
@@ -23,4 +23,8 @@ pub struct Args {
     /// Repository name in SonaType Nexus (required with --url)
     #[arg(long, requires = "url")]
     pub repo: Option<String>,
+
+    /// Filter results by version (exact match)
+    #[arg(short = 'v', long = "version-filter", id = "version_filter")]
+    pub version: Option<String>,
 }
